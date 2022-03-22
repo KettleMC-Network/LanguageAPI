@@ -4,7 +4,6 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import net.kettlemc.language.LanguageAPI;
 import net.kettlemc.language.entity.LanguageEntity;
-import net.kettlemc.language.file.Configuration;
 import net.kettlemc.language.spigot.skript.SkriptLangAddon;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
