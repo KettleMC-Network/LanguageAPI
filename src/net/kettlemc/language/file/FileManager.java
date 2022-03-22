@@ -50,7 +50,13 @@ public class FileManager {
         if (!isLoaded(language))
             loadLanguage(language);
         String message = (String) languages.get(language).get(path);
-        return message != null ? message : path;
+        if (message == null) {
+            LanguageAPI.LOGGER.warning("Couldn't find translation  '" + language.toLanguageTag() +"' for path '" + path + "'.");
+
+            // If there isn't a translation for the requested language, the default language will be requested
+            message = (String) languages.get(LanguageAPI.getDefaultLang()).get(path);
+        }
+        return message == null ? path : message;
     }
 
     public void loadLanguage(Locale language) {
