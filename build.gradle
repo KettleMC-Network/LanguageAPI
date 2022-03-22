@@ -32,7 +32,11 @@ repositories {
     flatDir {
         dirs 'libs'
     }
-    
+
+    maven {
+        url 'https://repo.destroystokyo.com/repository/maven-public/'
+    }
+
     maven {
         url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
     }
@@ -42,19 +46,11 @@ repositories {
     }
 
     maven {
-        url 'https://maven.sk89q.com/repo/'
-    }
-    
-    maven {
-    	url 'https://m2.dv8tion.net/releases'
-    }
-    
-    maven {
-        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
-    }
-
-    maven {
         url 'https://jitpack.io'
+    }
+	
+    maven {
+        url 'https://nexus.velocitypowered.com/repository/maven-public/'
     }
 }
 
@@ -67,21 +63,13 @@ dependencies {
 	testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
 
-    this.addModularCompile('org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT', 'spigot', false)
+    this.addModularInternal("com.oracle.ojdbc:ojdbc8:19.3.0.0", "ojdbc", false)
+    this.addModularInternal("mysql:mysql-connector-java:8.0.26", "mysql-connector", false)
     this.addModularCompile('com.googlecode.json-simple:json-simple:1.1.1', 'gson', false)
-    this.addModularCompile('com.sk89q.worldedit:worldedit-bukkit:6.1.4-SNAPSHOT', 'worldedit', true)
-    this.addModularCompile('com.github.LabyMod:legacy-labymod-server-api:master-SNAPSHOT', 'labymodapi', true)
-    this.addModularCompile('net.dv8tion:JDA:4.3.0_334', 'jda', false)
-    this.addModularCompile('com.github.pengrad:java-telegram-bot-api:5.2.0', 'telegramapi', false)
-    this.addModularCompile("me.clip:placeholderapi:2.10.10", "placeholderapi", false)
-    this.addModularCompile("net.luckperms:api:5.3", "luckperms", false)
-	this.addModularCompile('com.github.CuukyOfficial:CFW:master-SNAPSHOT', 'CFW', true)
-
-// Enable if needed
-/*
-    this.addModularInternal('com.github.CuukyOfficial:VaroBanAPI-Client:master-SNAPSHOT', 'banapi', true)
-    this.addModularInternal('com.github.CuukyOfficial:CFW:master-SNAPSHOT', 'CFW', true)
-*/
+    this.addModularCompile('com.velocitypowered:velocity-api:3.0.1', 'velocity', false)
+    this.addModularCompile('org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT', 'spigot', false)
+    this.addModularCompile('com.github.SkriptLang:Skript:2.6.1', 'skript', false)
+    annotationProcessor 'com.velocitypowered:velocity-api:3.0.1'
 }
 
 boolean checkLib(String filePath) {
@@ -107,7 +95,7 @@ jar {
         attributes(
                 'Manifest-Version': '1.0',
                 'Class-Path': '.',
-                'Main-Class': 'net.kettlemc.plugin.MainLauncher',
+                'Main-Class': 'net.kettlemc.language.MainLauncher',
         )
     }
 
@@ -119,15 +107,6 @@ jar {
     }
 }
 
-processResources {
-	duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    from (sourceSets.main.resources.srcDirs) {
-        filter ReplaceTokens, tokens: [name: "PluginName"]
-        filter ReplaceTokens, tokens: [version: "1.0.0-RELEASE"]
-        filter ReplaceTokens, tokens: [author: "KettleMC"]
-        filter ReplaceTokens, tokens: [main: "net.kettlemc.plugin.Main"]
-    }
-}
 
 test {
 	useJUnitPlatform()

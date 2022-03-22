@@ -1,12 +1,12 @@
-name: @name@
-author: @author@
-authors: []
-version: @version@
-softdepend: [LuckPerms, PlaceholderAPI, LabyModAPI, TelegramPlugin, PermissionsEx, LabyModAPI]
-loadbefore: []
+name: LanguageAPI
+main: net.kettlemc.language.spigot.SpigotAdapter
+version: 1.0
 api-version: 1.13
-main: @main@
-website: KettleMC.net
-
+author: LeStegii
+description: KettleMC Language Plugin
 commands:
-  
+  language:
+    aliases:
+      - languages
+      - lang
+      - sprache
