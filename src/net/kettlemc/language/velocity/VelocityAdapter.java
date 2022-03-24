@@ -26,7 +26,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-@Plugin(id = "languageapi", name = "LanguageAPI", version = "1.0", url = "https://kettlemc.net", description = "", authors = { "LeStegii" })
+@Plugin(id = "languageapi", name = "LanguageAPI", version = "1.0", url = "https://kettlemc.net", description = "LanguageAPI for translating messages", authors = { "LeStegii" })
 public class VelocityAdapter implements SimpleCommand {
 
     /**
@@ -101,8 +101,8 @@ public class VelocityAdapter implements SimpleCommand {
 
         String uuid = getUUID(event.getPlayer());
         this.server.getScheduler().buildTask(this, () -> {
-            event.getPlayer().sendMessage(color(getMessage(api, event.getPlayer(), "language.join.selected").replace("%language%", api.getLanguageString(uuid))));
-        }).delay(1L, TimeUnit.SECONDS).schedule();
+            event.getPlayer().sendMessage(color(LanguageAPI.getPrefix() + this.api.getMessage("language.join.selected", Locale.ENGLISH).replace("%language%", api.getLanguageString(uuid).toUpperCase())));
+        }).delay(2L, TimeUnit.SECONDS).schedule();
     }
 
     private CommandMeta getCommandMeta(String name, String... aliases) {
@@ -139,11 +139,10 @@ public class VelocityAdapter implements SimpleCommand {
                 entity.setLanguage(locale);
                 updateSubServers(player, locale);
                 entity.saveStats();
-                player.sendMessage(color(getMessage(api, player, "language.command.set").replace("%language%", api.getLanguageString(getUUID(player)))));
+                player.sendMessage(color(LanguageAPI.getPrefix() + getMessage(api, player, "language.command.set").replace("%language%", api.getLanguageString(getUUID(player)))));
                 return;
             }
         }
-        sendMessage(api, player, "language.command.invalid-language");
-        return;
+        player.sendMessage(color(LanguageAPI.getPrefix() + getMessage(api, player, "language.command.invalid-language")));
     }
 }
