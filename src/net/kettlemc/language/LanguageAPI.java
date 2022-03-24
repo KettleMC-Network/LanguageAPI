@@ -17,6 +17,8 @@ public class LanguageAPI {
 
     private static boolean setup;
 
+    private static String prefix;
+
     private static boolean enableSpigot;
     private static boolean enableVelocity;
 
@@ -62,6 +64,10 @@ public class LanguageAPI {
         return enableVelocity;
     }
 
+    public static String getPrefix() {
+        return prefix;
+    }
+
     public String getMessage(String path, Locale locale) {
         return this.manager.getMessage(path, locale);
     }
@@ -86,6 +92,7 @@ public class LanguageAPI {
         defaultLang = Locale.forLanguageTag(configuration.getString("settings.default-lang", "de"));
         enableSpigot = configuration.getBoolean("settings.enable-spigot", false);
         enableVelocity = configuration.getBoolean("settings.enable-velocity", false);
+        prefix = configuration.getString("settings.prefix", "&4Language &8» &7");
     }
 
     public static LanguageAPI registerAPI(String id) {
