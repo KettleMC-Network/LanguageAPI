@@ -15,7 +15,7 @@ public class LanguageEntity {
 
     private static List<LanguageEntity> entities = new ArrayList<>();
 
-    private String uuid;
+    private final String uuid;
     private Locale language;
 
     private int loadedState = 0;

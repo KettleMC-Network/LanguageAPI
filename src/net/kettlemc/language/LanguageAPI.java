@@ -14,17 +14,16 @@ public class LanguageAPI {
     public static final Logger LOGGER = Logger.getLogger("LanguageAPI");
     public static final String MESSAGE_NAMESPACE = "langapi";
     public static final String MESSAGE_IDENTIFIER = "switch";
-
-    private static boolean setup;
-
-    private static String prefix;
-
-    private static boolean enableSpigot;
-    private static boolean enableVelocity;
+    private static final Configuration configuration = Configuration.getConfig(CONFIG_PATH);
 
     private static MySQLClient mysqlClient;
-    private static Configuration configuration = Configuration.getConfig(CONFIG_PATH);
-    private static Locale defaultLang; // Can be set in the config file
+    private static boolean setup;
+
+    // Can be set in the config file
+    private static String prefix;
+    private static boolean enableSpigot;
+    private static boolean enableVelocity;
+    private static Locale defaultLang;
 
     private String id;
     private FileManager manager;

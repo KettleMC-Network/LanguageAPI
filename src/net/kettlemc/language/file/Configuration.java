@@ -63,8 +63,6 @@ public class Configuration {
         return instance != null;
     }
 
-
-
     public Object getValue(String path, Object defaultValue) {
         if (!isLoaded()) {
             LanguageAPI.LOGGER.warning("Tried to access config while it wasn't loaded.");

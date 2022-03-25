@@ -9,11 +9,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class FileManager {
 
-    private String id;
-    private HashMap<Locale, HashMap> languages = new HashMap<>();
+    private final String id;
+    private final Map<Locale, HashMap> languages = new HashMap<>();
 
     public FileManager(String id) {
         this.id = id;

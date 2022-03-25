@@ -66,14 +66,13 @@ public class VelocityAdapter implements SimpleCommand {
         return uuid;
     }
 
-
-    private LanguageAPI api;
-
     private final ProxyServer server;
     private final Logger logger;
     private final CommandManager commandManager;
 
-    private LegacyChannelIdentifier OUTGOING;
+    private final LanguageAPI api;
+
+    private final LegacyChannelIdentifier OUTGOING;
 
     @Inject
     public VelocityAdapter(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
