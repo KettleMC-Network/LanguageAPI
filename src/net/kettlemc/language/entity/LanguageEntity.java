@@ -80,6 +80,7 @@ public class LanguageEntity {
                     else {
                         language = Locale.forLanguageTag(result.getString("language"));
                         loadedState = 2;
+                        LanguageAPI.LOGGER.info("Loaded language " + language + " for uuid '" + uuid + "'.");
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -90,7 +91,6 @@ public class LanguageEntity {
                 }
             }
         });
-
         return wait;
     }
 
