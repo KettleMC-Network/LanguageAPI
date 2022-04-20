@@ -4,6 +4,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import net.kettlemc.language.LanguageAPI;
 import net.kettlemc.language.entity.LanguageEntity;
+import net.kettlemc.language.mysql.SQLHandler;
 import net.kettlemc.language.spigot.skript.SkriptLangAddon;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -13,6 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -113,16 +115,18 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
     }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent event) {
-        LanguageEntity entity = LanguageEntity.getEntity(event.getPlayer().getUniqueId().toString());
-        entity.loadLanguage();
+    public void onAsyncJoin(AsyncPlayerPreLoginEvent event) {
+        String uuid = event.getUniqueId().toString();
+        SQLHandler.load(uuid);
+    }
 
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
         if (LanguageAPI.isEnableSpigot()) {
-            String uuid = getUUID(event.getPlayer());
             Bukkit.getScheduler().runTaskLaterAsynchronously(this, new Runnable() {
                 @Override
                 public void run() {
-                    event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', LanguageAPI.getPrefix()) + getColoredMessage(api, event.getPlayer(), "language.join.selected").replace("%language%", api.getLanguageString(uuid)));
+                    event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', LanguageAPI.getPrefix()) + getColoredMessage(api, event.getPlayer(), "language.join.selected").replace("%language%", api.getLanguageString(event.getPlayer().getUniqueId().toString())));
                 }
             }, 20L);
         }

@@ -7,6 +7,7 @@ import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
+import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -18,6 +19,7 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.LegacyChannelIdentifier;
 import net.kettlemc.language.LanguageAPI;
 import net.kettlemc.language.entity.LanguageEntity;
+import net.kettlemc.language.mysql.SQLHandler;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
@@ -92,17 +94,21 @@ public class VelocityAdapter implements SimpleCommand {
     }
 
     @Subscribe
+    public EventTask onAsyncLogin(LoginEvent event) {
+        return EventTask.withContinuation(task -> {
+            SQLHandler.load(event.getPlayer().getUniqueId().toString());
+            task.resume();
+        });
+    }
+
+    @Subscribe
     public void onLogin(LoginEvent event) {
-        LanguageEntity entity = LanguageEntity.getEntity(event.getPlayer().getUniqueId().toString());
-
-        if (!entity.isLoaded())
-            entity.loadLanguage();
-
-        String uuid = getUUID(event.getPlayer());
+        String uuid = event.getPlayer().getUniqueId().toString();
         this.server.getScheduler().buildTask(this, () -> {
             event.getPlayer().sendMessage(color(LanguageAPI.getPrefix() + this.api.getMessage("language.join.selected", Locale.ENGLISH).replace("%language%", api.getLanguageString(uuid).toUpperCase())));
         }).delay(2L, TimeUnit.SECONDS).schedule();
     }
+
 
     private CommandMeta getCommandMeta(String name, String... aliases) {
         return commandManager.metaBuilder(name).aliases(aliases).build();

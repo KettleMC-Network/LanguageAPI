@@ -1,9 +1,10 @@
 package net.kettlemc.language;
 
+import com.github.almightysatan.jo2sql.SqlBuilder;
+import com.github.almightysatan.jo2sql.SqlProvider;
 import net.kettlemc.language.entity.LanguageEntity;
 import net.kettlemc.language.file.Configuration;
 import net.kettlemc.language.file.FileManager;
-import net.kettlemc.language.mysql.MySQLClient;
 
 import java.util.Locale;
 import java.util.logging.Logger;
@@ -16,7 +17,7 @@ public class LanguageAPI {
     public static final String MESSAGE_IDENTIFIER = "switch";
     private static final Configuration configuration = Configuration.getConfig(CONFIG_PATH);
 
-    private static MySQLClient mysqlClient;
+    private static SqlProvider sqlProvider;
     private static boolean setup;
 
     // Can be set in the config file
@@ -34,17 +35,24 @@ public class LanguageAPI {
     }
 
     private static void loadSQLClient() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return;
+        }
+
         String host = configuration.getString("sql.host", "localhost");
         String database = configuration.getString("sql.database", "language");
         String user = configuration.getString("sql.user", "user");
         String password = configuration.getString("sql.password", "password");
         long port = configuration.getLong("sql.port", 3306);
 
-        mysqlClient = new MySQLClient(host, port, database, user, password);
+        sqlProvider = new SqlBuilder().mariadb(host + ":" + port, user, password, database);
     }
 
-    public static MySQLClient getMySQLClient() {
-        return mysqlClient;
+    public static SqlProvider getSqlProvider() {
+        return sqlProvider;
     }
 
     public static Locale getDefaultLang() {

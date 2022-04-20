@@ -1,29 +1,34 @@
 package net.kettlemc.language.entity;
 
+import com.github.almightysatan.jo2sql.Column;
+import com.github.almightysatan.jo2sql.SqlSerializable;
 import net.kettlemc.language.LanguageAPI;
-import net.kettlemc.language.mysql.async.PreparedStatementExec;
-import net.kettlemc.language.mysql.async.PreparedStatementQuery;
+import net.kettlemc.language.mysql.SQLHandler;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+@SqlSerializable("LanguageEntity")
 public class LanguageEntity {
 
     private static List<LanguageEntity> entities = new ArrayList<>();
 
+    @Column(value = "uuid", size = 40, primary = true)
     private final String uuid;
-    private Locale language;
-
-    private int loadedState = 0;
-
+    @Column(value = "language", size = 2)
+    private String language;
 
     public LanguageEntity(String uuid) {
         this.uuid = uuid;
-        this.language = LanguageAPI.getDefaultLang();
+        this.language = LanguageAPI.getDefaultLang().toLanguageTag();
+        if (!entities.contains(this))
+            entities.add(this);
+    }
+
+    public LanguageEntity() {
+        this.uuid = null;
+        this.language = LanguageAPI.getDefaultLang().toLanguageTag();
         if (!entities.contains(this))
             entities.add(this);
     }
@@ -33,11 +38,11 @@ public class LanguageEntity {
     }
 
     public Locale getLanguage() {
-        return this.language;
+        return Locale.forLanguageTag(this.language);
     }
 
     public void setLanguage(Locale language) {
-        this.language = language;
+        this.language = language.toLanguageTag();
     }
 
     public static List<LanguageEntity> getEntities() {
@@ -59,70 +64,10 @@ public class LanguageEntity {
         new LanguageEntity(uuid);
     }
 
-    public Object loadLanguage() {
-        Object wait = new Object();
-        LanguageAPI.getMySQLClient().getAsyncPreparedQuery("SELECT language FROM language WHERE language.uuid=?;", new PreparedStatementQuery() {
-
-            @Override
-            public void onStatementPrepared(PreparedStatement statement) {
-                try {
-                    statement.setString(1, uuid);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onResultReceive(ResultSet result) {
-                try {
-                    if (!result.next())
-                        loadedState = 1;
-                    else {
-                        language = Locale.forLanguageTag(result.getString("language"));
-                        loadedState = 2;
-                        LanguageAPI.LOGGER.info("Loaded language " + language + " for uuid '" + uuid + "'.");
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-
-                synchronized (wait) {
-                    wait.notifyAll();
-                }
-            }
-        });
-        return wait;
-    }
-
     public void saveStats() {
-        String sql = loadedState == 1 ? "INSERT INTO language (uuid,language) VALUES (?,?);" : "UPDATE language SET language=? WHERE language.uuid=?;";
-        LanguageAPI.getMySQLClient().getAsyncPreparedQuery(sql, new PreparedStatementExec() {
-
-            @Override
-            public void onStatementPrepared(PreparedStatement statement) {
-                try {
-                    if (loadedState != 1) {
-                        statement.setString(1, language.toLanguageTag());
-                        statement.setString(2, uuid);
-                    } else {
-                        statement.setString(1, uuid);
-                        statement.setString(2, language.toLanguageTag());
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onStatementExec(boolean exec) {
-                loadedState = 2;
-            }
-        });
+        SQLHandler.save(this);
     }
 
-    public boolean isLoaded() {
-        return this.loadedState > 0;
-    }
 }
 
 
