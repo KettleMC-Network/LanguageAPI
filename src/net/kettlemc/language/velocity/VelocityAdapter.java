@@ -11,6 +11,7 @@ import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
@@ -20,6 +21,7 @@ import com.velocitypowered.api.proxy.messages.LegacyChannelIdentifier;
 import net.kettlemc.language.LanguageAPI;
 import net.kettlemc.language.entity.LanguageEntity;
 import net.kettlemc.language.mysql.SQLHandler;
+import net.kettlemc.language.platform.Platform;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
@@ -83,14 +85,19 @@ public class VelocityAdapter implements SimpleCommand {
         this.api = LanguageAPI.registerAPI("LanguageAPI");
         this.commandManager = server.getCommandManager();
         this.server.getChannelRegistrar().register(OUTGOING = new LegacyChannelIdentifier(LanguageAPI.MESSAGE_NAMESPACE + ":" + LanguageAPI.MESSAGE_IDENTIFIER));
+        this.api.loadMessages(); // Not needed but recommended so that it doesn't have to load later
     }
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
         logger.info("Loaded as a velocity plugin.");
-        if (LanguageAPI.isEnableVelocity()) {
-            commandManager.register(getCommandMeta("language", "lang", "sprache"), this);
-        }
+        commandManager.register(getCommandMeta("language", "lang", "sprache"), this);
+    }
+
+    @Subscribe
+    public void onProxyShutdown(ProxyShutdownEvent event) {
+        logger.info("Disabling velocity plugin...");
+        //api.save();
     }
 
     @Subscribe

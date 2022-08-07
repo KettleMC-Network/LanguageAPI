@@ -5,6 +5,7 @@ import com.google.common.io.ByteStreams;
 import net.kettlemc.language.LanguageAPI;
 import net.kettlemc.language.entity.LanguageEntity;
 import net.kettlemc.language.mysql.SQLHandler;
+import net.kettlemc.language.platform.Platform;
 import net.kettlemc.language.spigot.skript.SkriptLangAddon;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,6 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
 import java.util.Locale;
+import java.util.Objects;
 
 public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listener, PluginMessageListener {
 
@@ -76,20 +78,37 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
         return uuid;
     }
 
+
+    // Skript addons need to be loaded here (onLoad instead of onEnable)
+    @Override
+    public void onLoad() {
+        this.getLogger().info("Loading as a bukkit plugin.");
+        if (Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("Skript")).isEnabled()) {
+            this.getLogger().info("Loading Skript Addon...");
+            this.skriptLangAddon = new SkriptLangAddon(this);
+            this.skriptLangAddon.registerAddon();
+        } else {
+            this.getLogger().info("Skript not found. Skript Addon disabled.");
+        }
+    }
+
+    @Override
     public void onEnable() {
         this.api = LanguageAPI.registerAPI(this.getName());
         this.getLogger().info("Loaded as a bukkit plugin.");
         this.getLogger().info("Registering commands and listeners...");
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getServer().getMessenger().registerIncomingPluginChannel(this, LanguageAPI.MESSAGE_NAMESPACE + ":" + LanguageAPI.MESSAGE_IDENTIFIER, this);
-        if (LanguageAPI.isEnableSpigot())
+        if (!SpigotUtils.isBungeeEnabled()) {
+            this.getLogger().info("Registering language command...");
             this.getCommand("language").setExecutor(this);
-        if (Bukkit.getPluginManager().getPlugin("Skript") != null) {
-            this.getLogger().info("Loading Skript Addon...");
-            this.skriptLangAddon = new SkriptLangAddon(this);
-            this.skriptLangAddon.registerAddon();
         }
+        this.api.loadMessages(); // Not needed but recommended so that it doesn't have to load later
+    }
 
+    public void onDisable() {
+        this.getLogger().info("Disabled bukkit plugin.");
+        //api.save();
     }
 
     @Override
@@ -110,7 +129,6 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
             }
         }
         player.sendMessage(ChatColor.translateAlternateColorCodes('&', LanguageAPI.getPrefix()) + getColoredMessage(api, player, "language.command.invalid-language"));
-
         return false;
     }
 
@@ -122,7 +140,7 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        if (LanguageAPI.isEnableSpigot()) {
+        if (!SpigotUtils.isBungeeEnabled()) {
             Bukkit.getScheduler().runTaskLaterAsynchronously(this, new Runnable() {
                 @Override
                 public void run() {

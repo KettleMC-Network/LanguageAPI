@@ -5,13 +5,16 @@ import com.github.almightysatan.jo2sql.SqlProvider;
 import net.kettlemc.language.entity.LanguageEntity;
 import net.kettlemc.language.file.Configuration;
 import net.kettlemc.language.file.FileManager;
+import net.kettlemc.language.platform.Platform;
 
 import java.util.Locale;
 import java.util.logging.Logger;
 
 public class LanguageAPI {
 
-    private static final String CONFIG_PATH = "plugins/LanguageAPI/config.json";
+    public static final String NOT_TRANSLATED = "This message has not yet been translated.";
+    public static final String CONFIG_PATH = "plugins/LanguageAPI/config.json";
+    public static final String LANGUAGE_PATH = "plugins/LanguageAPI/languages/";
     public static final Logger LOGGER = Logger.getLogger("LanguageAPI");
     public static final String MESSAGE_NAMESPACE = "langapi";
     public static final String MESSAGE_IDENTIFIER = "switch";
@@ -22,8 +25,6 @@ public class LanguageAPI {
 
     // Can be set in the config file
     private static String prefix;
-    private static boolean enableSpigot;
-    private static boolean enableVelocity;
     private static Locale defaultLang;
 
     private String id;
@@ -63,14 +64,6 @@ public class LanguageAPI {
         return configuration;
     }
 
-    public static boolean isEnableSpigot() {
-        return enableSpigot;
-    }
-
-    public static boolean isEnableVelocity() {
-        return enableVelocity;
-    }
-
     public static String getPrefix() {
         return prefix;
     }
@@ -97,9 +90,11 @@ public class LanguageAPI {
 
     private static void loadConfig() {
         defaultLang = Locale.forLanguageTag(configuration.getString("settings.default-lang", "de"));
-        enableSpigot = configuration.getBoolean("settings.enable-spigot", false);
-        enableVelocity = configuration.getBoolean("settings.enable-velocity", false);
         prefix = configuration.getString("settings.prefix", "&4Language &8» &7");
+    }
+
+    public void loadMessages() {
+        this.manager.loadAllLanguages();
     }
 
     public static LanguageAPI registerAPI(String id) {
@@ -114,7 +109,10 @@ public class LanguageAPI {
 
         LOGGER.info("Loaded API for plugin with id '" + id + "'.");
         return new LanguageAPI(id);
-
     }
-
+/*
+    public void save() {
+        this.manager.save();
+    }
+*/
 }

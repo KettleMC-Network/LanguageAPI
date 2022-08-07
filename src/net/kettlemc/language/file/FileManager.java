@@ -5,6 +5,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -24,10 +25,7 @@ public class FileManager {
         try {
             HashMap<String, String> messages = new HashMap<>();
             File file = getFile(locale);
-            if (!file.exists()) {
-                file.getParentFile().mkdirs();
-                file.createNewFile();
-            }
+            createFileIfNotExists(file);
             LanguageAPI.LOGGER.info("Loading file " + file.getAbsolutePath());
             String content = new String(Files.readAllBytes(Paths.get(file.toURI())), "UTF-8");
             JSONObject json = content.isEmpty() ? new JSONObject() : (JSONObject) new JSONParser().parse(content);
@@ -43,8 +41,67 @@ public class FileManager {
         }
     }
 
+    /*
+        public void saveHashMapToFile(Locale locale) {
+            LanguageAPI.LOGGER.info("Saving the language file " + locale.toLanguageTag() + ".");
+            if (languages == null || !isLoaded(locale)) {
+                LanguageAPI.LOGGER.warning("Couldn't save the language file for " + locale.toLanguageTag() + " (not loaded).");
+                return;
+            }
+            JSONObject json = new JSONObject();
+            HashMap language = languages.get(locale);
+            language.keySet().forEach(key -> {
+                json.put(key, language.get(key));
+            });
+            try {
+                new FileWriter(getFile(locale)).write(json.toJSONString());
+                LanguageAPI.LOGGER.info("Saved the language file " + locale.toLanguageTag() + ".");
+            } catch (IOException exception) {
+                LanguageAPI.LOGGER.severe("Couldn't save the language file " + locale.toLanguageTag() !");
+                exception.printStackTrace();
+            }
+        }
+    /*
+        public void save() {
+            if (languages == null) {
+                LanguageAPI.LOGGER.warning("Couldn't save languages (null)!");
+                return;
+            }
+            LanguageAPI.LOGGER.info("Saving all the language files...");
+            for (Locale locale : languages.keySet()) {
+                saveHashMapToFile(locale);
+            }
+        }
+    */
+
+    public void loadAllLanguages() {
+        File file = new File(LanguageAPI.LANGUAGE_PATH + this.id + "/");
+        createFolder(file);
+        LanguageAPI.LOGGER.info("Checking " + file.getAbsolutePath() + " for any language files...");
+        for (File subFile : file.listFiles()) {
+            LanguageAPI.LOGGER.info("Detected file " + subFile.getName() + ".");
+            loadLanguage(Locale.forLanguageTag(subFile.getName().replace(".json", "")));
+        }
+    }
+
+    private void createFileIfNotExists(File file) {
+        if (!file.exists()) {
+            file.getParentFile().mkdirs();
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void createFolder(File file) {
+        file.getParentFile().mkdirs();
+        file.mkdirs();
+    }
+
     private File getFile(Locale language) {
-        return new File("languages/" + this.id  + "/" + language.toLanguageTag() + ".json");
+        return new File(LanguageAPI.LANGUAGE_PATH + this.id + "/" + language.toLanguageTag() + ".json");
     }
 
     public String getMessage(String path, Locale language) {
@@ -52,7 +109,13 @@ public class FileManager {
             loadLanguage(language);
         String message = (String) languages.get(language).get(path);
         if (message == null) {
-            LanguageAPI.LOGGER.warning("Couldn't find translation  '" + language.toLanguageTag() +"' for path '" + path + "'.");
+            LanguageAPI.LOGGER.warning("Couldn't find translation '" + language.toLanguageTag() +"' for path '" + path + "'.");
+            /*
+            LanguageAPI.LOGGER.info("Creating default String for '" + path + "'.");
+            languages.values().forEach(lang -> {
+                lang.put(path, LanguageAPI.NOT_TRANSLATED);
+            });
+            */
 
             // If there isn't a translation for the requested language, the default language will be requested
             message = (String) languages.get(LanguageAPI.getDefaultLang()).get(path);
