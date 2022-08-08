@@ -78,10 +78,7 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
         return uuid;
     }
 
-
-    // Skript addons need to be loaded here (onLoad instead of onEnable)
-    @Override
-    public void onLoad() {
+    private void loadSkript() {
         this.getLogger().info("Loading as a bukkit plugin.");
         if (Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("Skript")).isEnabled()) {
             this.getLogger().info("Loading Skript Addon...");
@@ -98,6 +95,7 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
         this.getLogger().info("Loaded as a bukkit plugin.");
         this.getLogger().info("Registering commands and listeners...");
         Bukkit.getPluginManager().registerEvents(this, this);
+        loadSkript();
         Bukkit.getServer().getMessenger().registerIncomingPluginChannel(this, LanguageAPI.MESSAGE_NAMESPACE + ":" + LanguageAPI.MESSAGE_IDENTIFIER, this);
         if (!SpigotUtils.isBungeeEnabled()) {
             this.getLogger().info("Registering language command...");
