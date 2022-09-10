@@ -24,6 +24,7 @@ import net.kettlemc.language.mysql.SQLHandler;
 import net.kettlemc.language.platform.Platform;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.ChatColor;
 
 import java.nio.file.Path;
 import java.util.Locale;
@@ -80,6 +81,7 @@ public class VelocityAdapter implements SimpleCommand {
 
     @Inject
     public VelocityAdapter(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
+
         this.server = server;
         this.logger = logger;
         this.api = LanguageAPI.registerAPI("LanguageAPI");
@@ -90,6 +92,7 @@ public class VelocityAdapter implements SimpleCommand {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
+        logger.info("Loading on platform: " + Platform.get().toString());
         logger.info("Loaded as a velocity plugin.");
         commandManager.register(getCommandMeta("language", "lang", "sprache"), this);
     }
@@ -145,6 +148,13 @@ public class VelocityAdapter implements SimpleCommand {
         }
         Player player = (Player) sender;
         if (args.length >= 1) {
+
+            if (player.hasPermission("languageapi.reload") && args[0].equalsIgnoreCase("reload")) {
+                this.api.loadMessages();
+                player.sendMessage(color(LanguageAPI.getPrefix() + "Reloaded!"));
+                return;
+            }
+
             Locale locale = Locale.forLanguageTag(args[0]);
             if (api.doesFileExist(locale)) {
                 LanguageEntity entity = LanguageEntity.getEntity(player.getUniqueId().toString());

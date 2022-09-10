@@ -91,6 +91,7 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
 
     @Override
     public void onEnable() {
+        this.getLogger().info("Loading on platform: " + Platform.get().toString());
         this.api = LanguageAPI.registerAPI(this.getName());
         this.getLogger().info("Loaded as a bukkit plugin.");
         this.getLogger().info("Registering commands and listeners...");
@@ -117,6 +118,13 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
         Player player = (Player) sender;
 
         if (args.length >= 1) {
+
+            if (player.hasPermission("languageapi.reload") && args[0].equalsIgnoreCase("reload")) {
+                this.api.loadMessages();
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', LanguageAPI.getPrefix()) + "Reloaded!");
+                return true;
+            }
+
             Locale locale = Locale.forLanguageTag(args[0]);
             if (api.doesFileExist(locale)) {
                 LanguageEntity entity = LanguageEntity.getEntity(player.getUniqueId().toString());
