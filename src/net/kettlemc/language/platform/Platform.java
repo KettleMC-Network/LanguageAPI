@@ -23,6 +23,7 @@ public enum Platform {
             for (Platform value : values()) {
                 if (classExists(value.getClassName())) {
                     platform = value;
+                    return platform;
                 }
             }
             platform = UNKNOWN;
