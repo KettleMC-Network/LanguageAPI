@@ -9,6 +9,7 @@ public class SpigotUtils {
             try {
                 return Class.forName("org.spigotmc.SpigotConfig").getField("bungee").getBoolean(null);
             } catch (Exception ignored) {
+                System.out.println("Couldn't access bungee field in SpigotConfig!");
                 return true;
             }
         }
