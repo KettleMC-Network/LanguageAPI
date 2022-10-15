@@ -65,10 +65,7 @@ dependencies {
 	testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
 
-    this.addModularInternal("com.oracle.ojdbc:ojdbc8:19.3.0.0", "ojdbc", false)
-    this.addModularInternal("mysql:mysql-connector-java:8.0.28", "mysql-connector", false)
-    this.addModularInternal('com.github.almighty-satan:jo2sql:1.2.2', 'jo2sql', false)
-    this.addModularInternal('com.googlecode.json-simple:json-simple:1.1.1', 'gson', false)
+    this.addModularCompile('com.github.KettleMC-Network:Libraries:master-SNAPSHOT', 'libraries', false)
     this.addModularCompile('com.velocitypowered:velocity-api:3.0.1', 'velocity', false)
     this.addModularCompile('org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT', 'spigot', false)
     this.addModularCompile('com.github.SkriptLang:Skript:2.6.1', 'skript', false)
