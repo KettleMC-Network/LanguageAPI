@@ -31,6 +31,7 @@ public class FileManager {
             JSONObject json = content.isEmpty() ? new JSONObject() : (JSONObject) new JSONParser().parse(content);
             for (Object key : json.keySet()) {
                 if (key instanceof String)
+                    LanguageAPI.LOGGER.info("Loaded path " + (String) key + " as " + (String) json.get(key) + ".");
                     messages.put((String) key, (String) json.get(key));
             }
             return messages;
@@ -75,12 +76,14 @@ public class FileManager {
     */
 
     public void loadAllLanguages() {
-        File file = new File(LanguageAPI.LANGUAGE_PATH + this.id + "/");
-        createFolder(file);
-        LanguageAPI.LOGGER.info("Checking " + file.getAbsolutePath() + " for any language files...");
-        for (File subFile : file.listFiles()) {
-            LanguageAPI.LOGGER.info("Detected file " + subFile.getName() + ".");
-            loadLanguage(Locale.forLanguageTag(subFile.getName().replace(".json", "")));
+        File directory = new File(LanguageAPI.LANGUAGE_PATH);
+        createFolder(directory);
+        for (File id : directory.listFiles()) {
+            LanguageAPI.LOGGER.info("Checking " + id.getAbsolutePath() + " for any language files...");
+            for (File subFile : id.listFiles()) {
+                LanguageAPI.LOGGER.info("Detected file " + subFile.getName() + ".");
+                loadLanguage(Locale.forLanguageTag(subFile.getName().replace(".json", "")));
+            }
         }
     }
 
@@ -124,6 +127,8 @@ public class FileManager {
     }
 
     public void loadLanguage(Locale language) {
+        if (languages.containsKey(language))
+            languages.remove(language);
         languages.put(language, getHashMapFromFile(language));
     }
 

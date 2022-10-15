@@ -96,7 +96,7 @@ void addModularInternal(String repoName, String fileName, boolean changingB) {
 jar {
     manifest {
         attributes(
-                'Manifest-Version': '1.0',
+                'Manifest-Version': '1.1',
                 'Class-Path': '.',
                 'Main-Class': 'net.kettlemc.language.MainLauncher',
         )
