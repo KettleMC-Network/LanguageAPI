@@ -118,7 +118,7 @@ public class FileManager {
             // If there isn't a translation for the requested language, the default language will be requested
             message = (String) languages.get(LanguageAPI.getDefaultLang()).get(path);
         }
-        return message == null ? VelocityConfigManager.MESSAGE_NOT_TRANSLATED_MESSAGE.getValue() : message;
+        return message == null ? ConfigManager.MESSAGE_NOT_TRANSLATED_MESSAGE.getValue() : message;
     }
 
     public void loadLanguage(Locale language) {

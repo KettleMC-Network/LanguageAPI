@@ -20,7 +20,7 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.LegacyChannelIdentifier;
 import net.kettlemc.language.LanguageAPI;
 import net.kettlemc.language.entity.LanguageEntity;
-import net.kettlemc.language.file.VelocityConfigManager;
+import net.kettlemc.language.file.ConfigManager;
 import net.kettlemc.language.file.entry.Message;
 import net.kettlemc.language.mysql.SQLHandler;
 import net.kettlemc.language.platform.Platform;
@@ -77,7 +77,7 @@ public class VelocityAdapter implements SimpleCommand {
     public void onLogin(LoginEvent event) {
         String uuid = event.getPlayer().getUniqueId().toString();
         this.server.getScheduler().buildTask(this, () -> {
-            Message message = new Message("language.join.selected").translate(this.api, Locale.ENGLISH).prefix(VelocityConfigManager.PREFIX.getValue());
+            Message message = new Message("language.join.selected").translate(this.api, Locale.ENGLISH).prefix(ConfigManager.PREFIX.getValue());
             message.replace("%language%", api.getLanguageString(uuid));
             event.getPlayer().sendMessage(message.buildComponent());
         }).delay(2L, TimeUnit.SECONDS).schedule();
@@ -113,7 +113,7 @@ public class VelocityAdapter implements SimpleCommand {
 
             if (player.hasPermission("languageapi.reload") && args[0].equalsIgnoreCase("reload")) {
                 this.api.loadMessages();
-                Message message = new Message("language.command.reloaded").translate(this.api, uuid).prefix(VelocityConfigManager.PREFIX.getValue());
+                Message message = new Message("language.command.reloaded").translate(this.api, uuid).prefix(ConfigManager.PREFIX.getValue());
                 player.sendMessage(message.buildComponent());
                 return;
             }
@@ -124,12 +124,12 @@ public class VelocityAdapter implements SimpleCommand {
                 entity.setLanguage(locale);
                 updateSubServers(player, locale);
                 entity.saveStats();
-                Message message = new Message("language.command.set").translate(this.api, uuid).replace("%language%", api.getLanguageString(uuid)).prefix(VelocityConfigManager.PREFIX.getValue());
+                Message message = new Message("language.command.set").translate(this.api, uuid).replace("%language%", api.getLanguageString(uuid)).prefix(ConfigManager.PREFIX.getValue());
                 player.sendMessage(message.buildComponent());
                 return;
             }
         }
-        Message message = new Message("language.command.invalid-language").translate(this.api, uuid).prefix(VelocityConfigManager.PREFIX.getValue());
+        Message message = new Message("language.command.invalid-language").translate(this.api, uuid).prefix(ConfigManager.PREFIX.getValue());
         player.sendMessage(message.buildComponent());
     }
 }

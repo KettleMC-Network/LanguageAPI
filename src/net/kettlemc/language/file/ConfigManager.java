@@ -5,7 +5,7 @@ import net.kettlemc.konfiguration.entry.IntegerConfigEntry;
 import net.kettlemc.konfiguration.entry.StringConfigEntry;
 import net.kettlemc.language.LanguageAPI;
 
-public class VelocityConfigManager {
+public class ConfigManager {
 
     public static StringConfigEntry PREFIX = new StringConfigEntry(LanguageAPI.CONFIGURATION, "&4LanguageAPI &8» &7", "messages.prefix");
     public static StringConfigEntry MESSAGE_NOT_TRANSLATED_MESSAGE = new StringConfigEntry(LanguageAPI.CONFIGURATION, "This message has not yet been translated.", "messages.not-translated");

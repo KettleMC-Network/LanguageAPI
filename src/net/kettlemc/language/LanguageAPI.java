@@ -4,7 +4,7 @@ import com.github.almightysatan.jo2sql.SqlBuilder;
 import com.github.almightysatan.jo2sql.SqlProvider;
 import net.kettlemc.konfiguration.Configuration;
 import net.kettlemc.language.entity.LanguageEntity;
-import net.kettlemc.language.file.VelocityConfigManager;
+import net.kettlemc.language.file.ConfigManager;
 import net.kettlemc.language.file.FileManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,11 +47,11 @@ public class LanguageAPI {
             return;
         }
 
-        String host = VelocityConfigManager.MYSQL_HOST.getValue();
-        String database = VelocityConfigManager.MYSQL_DATABASE.getValue();
-        String user = VelocityConfigManager.MYSQL_USER.getValue();
-        String password = VelocityConfigManager.MYSQL_PASSWORD.getValue();
-        long port = VelocityConfigManager.MYSQL_PORT.getValue();
+        String host = ConfigManager.MYSQL_HOST.getValue();
+        String database = ConfigManager.MYSQL_DATABASE.getValue();
+        String user = ConfigManager.MYSQL_USER.getValue();
+        String password = ConfigManager.MYSQL_PASSWORD.getValue();
+        long port = ConfigManager.MYSQL_PORT.getValue();
 
         sqlProvider = new SqlBuilder().mariadb(host + ":" + port, user, password, database);
     }

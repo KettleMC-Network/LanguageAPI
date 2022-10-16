@@ -4,13 +4,12 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import net.kettlemc.language.LanguageAPI;
 import net.kettlemc.language.entity.LanguageEntity;
-import net.kettlemc.language.file.VelocityConfigManager;
+import net.kettlemc.language.file.ConfigManager;
 import net.kettlemc.language.file.entry.Message;
 import net.kettlemc.language.mysql.SQLHandler;
 import net.kettlemc.language.platform.Platform;
 import net.kettlemc.language.spigot.skript.SkriptLangAddon;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -74,7 +73,7 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
 
             if (player.hasPermission("languageapi.reload") && args[0].equalsIgnoreCase("reload")) {
                 this.api.loadMessages();
-                Message message = new Message("language.command.reloaded").translate(this.api, uuid).prefix(VelocityConfigManager.PREFIX.getValue());
+                Message message = new Message("language.command.reloaded").translate(this.api, uuid).prefix(ConfigManager.PREFIX.getValue());
                 player.sendMessage(message.buildChatColor());
                 return true;
             }
@@ -84,12 +83,12 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
                 LanguageEntity entity = LanguageEntity.getEntity(player.getUniqueId().toString());
                 entity.setLanguage(locale);
                 entity.saveStats();
-                Message message = new Message("language.command.set").translate(this.api, uuid).replace("%language%", api.getLanguageString(uuid)).prefix(VelocityConfigManager.PREFIX.getValue());
+                Message message = new Message("language.command.set").translate(this.api, uuid).replace("%language%", api.getLanguageString(uuid)).prefix(ConfigManager.PREFIX.getValue());
                 player.sendMessage(message.buildChatColor());
                 return true;
             }
         }
-        Message message = new Message("language.command.invalid-language").translate(this.api, uuid).prefix(VelocityConfigManager.PREFIX.getValue());
+        Message message = new Message("language.command.invalid-language").translate(this.api, uuid).prefix(ConfigManager.PREFIX.getValue());
         return false;
     }
 
@@ -104,7 +103,7 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
         String uuid = event.getPlayer().getUniqueId().toString();
         if (!SpigotUtils.isBungeeEnabled()) {
             Bukkit.getScheduler().runTaskLaterAsynchronously(this, () -> {
-                Message message = new Message("language.join.selected").translate(api, Locale.ENGLISH).prefix(VelocityConfigManager.PREFIX.getValue());
+                Message message = new Message("language.join.selected").translate(api, Locale.ENGLISH).prefix(ConfigManager.PREFIX.getValue());
                 message.replace("%language%", api.getLanguageString(uuid));
                 event.getPlayer().sendMessage(message.buildChatColor());
             }, 20L);
