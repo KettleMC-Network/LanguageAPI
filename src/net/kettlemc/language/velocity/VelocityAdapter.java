@@ -30,7 +30,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-@Plugin(id = "languageapi", name = "LanguageAPI", version = "1.1", url = "https://kettlemc.net", description = "LanguageAPI for translating messages", authors = { "LeStegii" })
+@Plugin(id = "languageapi", name = "LanguageAPI", version = "1.2", url = "https://kettlemc.net", description = "LanguageAPI for translating messages", authors = { "LeStegii" })
 public class VelocityAdapter implements SimpleCommand {
 
 
