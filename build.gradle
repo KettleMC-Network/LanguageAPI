@@ -69,7 +69,8 @@ dependencies {
 	testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
 
-    this.addModularCompile('com.github.KettleMC-Network:Libraries:master-SNAPSHOT', 'libraries', false)
+    this.addModularCompile('com.github.KettleMC-Network:Libraries:master-SNAPSHOT', 'libraries', true)
+    this.addModularCompile('com.github.KettleMC-Network:Konfiguration:2.0.1', 'konfiguration', true)
     this.addModularCompile('com.velocitypowered:velocity-api:3.0.1', 'velocity', false)
     this.addModularCompile('org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT', 'spigot', false)
     this.addModularCompile('com.github.SkriptLang:Skript:2.6.1', 'skript', false)

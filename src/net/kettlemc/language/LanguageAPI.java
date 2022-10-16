@@ -2,23 +2,27 @@ package net.kettlemc.language;
 
 import com.github.almightysatan.jo2sql.SqlBuilder;
 import com.github.almightysatan.jo2sql.SqlProvider;
+import net.kettlemc.konfiguration.Configuration;
 import net.kettlemc.language.entity.LanguageEntity;
-import net.kettlemc.language.file.Configuration;
+import net.kettlemc.language.file.VelocityConfigManager;
 import net.kettlemc.language.file.FileManager;
-import net.kettlemc.language.platform.Platform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
-import java.util.logging.Logger;
 
 public class LanguageAPI {
 
-    public static final String NOT_TRANSLATED = "This message has not yet been translated.";
-    public static final String CONFIG_PATH = "plugins/LanguageAPI/config.json";
-    public static final String LANGUAGE_PATH = "plugins/LanguageAPI/languages/";
-    public static final Logger LOGGER = Logger.getLogger("LanguageAPI");
+    public static final Path CONFIG_PATH = Paths.get("plugins/LanguageAPI/");
+    public static final Path LANGUAGE_PATH = CONFIG_PATH.resolve("languages/");
+
+    public static final Configuration CONFIGURATION = new Configuration(CONFIG_PATH);
+
+    public static final Logger LOGGER = LoggerFactory.getLogger(LanguageAPI.class.getSimpleName());
     public static final String MESSAGE_NAMESPACE = "langapi";
     public static final String MESSAGE_IDENTIFIER = "switch";
-    private static final Configuration configuration = Configuration.getConfig(CONFIG_PATH);
 
     private static SqlProvider sqlProvider;
     private static boolean setup;
@@ -43,11 +47,11 @@ public class LanguageAPI {
             return;
         }
 
-        String host = configuration.getString("sql.host", "localhost");
-        String database = configuration.getString("sql.database", "language");
-        String user = configuration.getString("sql.user", "user");
-        String password = configuration.getString("sql.password", "password");
-        long port = configuration.getLong("sql.port", 3306);
+        String host = VelocityConfigManager.MYSQL_HOST.getValue();
+        String database = VelocityConfigManager.MYSQL_DATABASE.getValue();
+        String user = VelocityConfigManager.MYSQL_USER.getValue();
+        String password = VelocityConfigManager.MYSQL_PASSWORD.getValue();
+        long port = VelocityConfigManager.MYSQL_PORT.getValue();
 
         sqlProvider = new SqlBuilder().mariadb(host + ":" + port, user, password, database);
     }
@@ -58,10 +62,6 @@ public class LanguageAPI {
 
     public static Locale getDefaultLang() {
         return defaultLang;
-    }
-
-    public static Configuration getConfiguration() {
-        return configuration;
     }
 
     public static String getPrefix() {
@@ -88,11 +88,6 @@ public class LanguageAPI {
         return this.manager.doesFileExist(language);
     }
 
-    private static void loadConfig() {
-        defaultLang = Locale.forLanguageTag(configuration.getString("settings.default-lang", "de"));
-        prefix = configuration.getString("settings.prefix", "&4Language &8» &7");
-    }
-
     public void loadMessages() {
         this.manager.loadAllLanguages();
     }
@@ -100,8 +95,6 @@ public class LanguageAPI {
     public static LanguageAPI registerAPI(String id) {
         if (!setup) {
             LOGGER.info("Initial Setup...");
-            LOGGER.info("Loading configuration...");
-            loadConfig();
             LOGGER.info("Loading SQL connnection...");
             loadSQLClient();
             setup = true;

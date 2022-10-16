@@ -21,22 +21,34 @@ public class FileManager {
         this.id = id;
     }
 
+    public void loadAllLanguages() {
+        File directory = LanguageAPI.LANGUAGE_PATH.toFile();
+        createFolder(directory);
+        for (File langId : directory.listFiles()) {
+            LanguageAPI.LOGGER.debug("Checking " + langId.getAbsolutePath() + " for any language files...");
+            for (File subFile : langId.listFiles()) {
+                LanguageAPI.LOGGER.info("Detected file " + subFile.getName() + ".");
+                loadLanguage(Locale.forLanguageTag(subFile.getName().replace(".json", "")));
+            }
+        }
+    }
+
     public HashMap getHashMapFromFile(Locale locale) {
         try {
             HashMap<String, String> messages = new HashMap<>();
             File file = getFile(locale);
             createFileIfNotExists(file);
-            LanguageAPI.LOGGER.info("Loading file " + file.getAbsolutePath());
+            LanguageAPI.LOGGER.debug("Loading file " + file.getAbsolutePath() + ".");
             String content = new String(Files.readAllBytes(Paths.get(file.toURI())), "UTF-8");
             JSONObject json = content.isEmpty() ? new JSONObject() : (JSONObject) new JSONParser().parse(content);
             for (Object key : json.keySet()) {
                 if (key instanceof String)
-                    LanguageAPI.LOGGER.info("Loaded path " + (String) key + " as " + (String) json.get(key) + ".");
+                    LanguageAPI.LOGGER.debug("Loaded path '" + key + "' as '" + json.get(key) + "'.");
                     messages.put((String) key, (String) json.get(key));
             }
             return messages;
         } catch (Exception exception) {
-            LanguageAPI.LOGGER.severe("Couldn't read the language file!");
+            LanguageAPI.LOGGER.error("Couldn't read the language file for the locale '" + locale.toLanguageTag() + "' (ID: " + this.id + ")!");
             exception.printStackTrace();
             return null;
         }
@@ -75,17 +87,6 @@ public class FileManager {
         }
     */
 
-    public void loadAllLanguages() {
-        File directory = new File(LanguageAPI.LANGUAGE_PATH);
-        createFolder(directory);
-        for (File id : directory.listFiles()) {
-            LanguageAPI.LOGGER.info("Checking " + id.getAbsolutePath() + " for any language files...");
-            for (File subFile : id.listFiles()) {
-                LanguageAPI.LOGGER.info("Detected file " + subFile.getName() + ".");
-                loadLanguage(Locale.forLanguageTag(subFile.getName().replace(".json", "")));
-            }
-        }
-    }
 
     private void createFileIfNotExists(File file) {
         if (!file.exists()) {
@@ -112,18 +113,12 @@ public class FileManager {
             loadLanguage(language);
         String message = (String) languages.get(language).get(path);
         if (message == null) {
-            LanguageAPI.LOGGER.warning("Couldn't find translation '" + language.toLanguageTag() +"' for path '" + path + "'.");
-            /*
-            LanguageAPI.LOGGER.info("Creating default String for '" + path + "'.");
-            languages.values().forEach(lang -> {
-                lang.put(path, LanguageAPI.NOT_TRANSLATED);
-            });
-            */
+            LanguageAPI.LOGGER.warn("Couldn't find translation '" + language.toLanguageTag() +"' for path '" + path + "'.");
 
             // If there isn't a translation for the requested language, the default language will be requested
             message = (String) languages.get(LanguageAPI.getDefaultLang()).get(path);
         }
-        return message == null ? path : message;
+        return message == null ? VelocityConfigManager.MESSAGE_NOT_TRANSLATED_MESSAGE.getValue() : message;
     }
 
     public void loadLanguage(Locale language) {

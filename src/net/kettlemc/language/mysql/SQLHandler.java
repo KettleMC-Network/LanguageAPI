@@ -20,7 +20,7 @@ public class SQLHandler {
         try {
             loadedEntity = future.get(30l, TimeUnit.SECONDS);
         } catch (InterruptedException | TimeoutException | ExecutionException e) {
-            LanguageAPI.LOGGER.severe("Problem loading entity for uuid " + uuid + ". See error below.");
+            LanguageAPI.LOGGER.error("Problem loading entity for uuid " + uuid + ". See error below.");
             e.printStackTrace();
         }
         if (loadedEntity == null) {

@@ -20,11 +20,10 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.LegacyChannelIdentifier;
 import net.kettlemc.language.LanguageAPI;
 import net.kettlemc.language.entity.LanguageEntity;
+import net.kettlemc.language.file.VelocityConfigManager;
+import net.kettlemc.language.file.entry.Message;
 import net.kettlemc.language.mysql.SQLHandler;
 import net.kettlemc.language.platform.Platform;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.ChatColor;
 
 import java.nio.file.Path;
 import java.util.Locale;
@@ -34,42 +33,6 @@ import java.util.logging.Logger;
 @Plugin(id = "languageapi", name = "LanguageAPI", version = "1.1", url = "https://kettlemc.net", description = "LanguageAPI for translating messages", authors = { "LeStegii" })
 public class VelocityAdapter implements SimpleCommand {
 
-    /**
-     * Sends a message to a player/the console
-     * @param api The LanguageAPI you want to send the message from
-     * @param receiver The CommandSource you want to send the message to
-     * @param path The message path you want to send to the CommandSource
-     **/
-    public static void sendMessage(LanguageAPI api, CommandSource receiver, String path) {
-        receiver.sendMessage(color(getMessage(api, receiver, path)));
-    }
-
-    /**
-     * @param api The LanguageAPI you want to send the message from
-     * @param sender The CommandSource you want to send the message to
-     * @param path The message path you want to send to the CommandSource
-     * @return Colored and translated message
-     **/
-    public static String getMessage(LanguageAPI api, CommandSource sender, String path) {
-        String message;
-        if (sender instanceof Player) {
-            message = api.getMessage(path, ((Player) sender).getUniqueId().toString());
-        } else {
-            message = api.getMessage(path, LanguageAPI.getDefaultLang());
-        }
-        return message;
-    }
-
-    /**
-     * @param sender CommandSource you want to get the UUID from
-     * @return UUID of the provided entity or null if not a player
-     **/
-    public static String getUUID(CommandSource sender) {
-        String uuid = null;
-        if (sender instanceof Player)
-            uuid = ((Player) sender).getUniqueId().toString();
-        return uuid;
-    }
 
     private final ProxyServer server;
     private final Logger logger;
@@ -100,7 +63,6 @@ public class VelocityAdapter implements SimpleCommand {
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) {
         logger.info("Disabling velocity plugin...");
-        //api.save();
     }
 
     @Subscribe
@@ -115,7 +77,9 @@ public class VelocityAdapter implements SimpleCommand {
     public void onLogin(LoginEvent event) {
         String uuid = event.getPlayer().getUniqueId().toString();
         this.server.getScheduler().buildTask(this, () -> {
-            event.getPlayer().sendMessage(color(LanguageAPI.getPrefix() + this.api.getMessage("language.join.selected", Locale.ENGLISH).replace("%language%", api.getLanguageString(uuid).toUpperCase())));
+            Message message = new Message("language.join.selected").translate(this.api, Locale.ENGLISH).prefix(VelocityConfigManager.PREFIX.getValue());
+            message.replace("%language%", api.getLanguageString(uuid));
+            event.getPlayer().sendMessage(message.buildComponent());
         }).delay(2L, TimeUnit.SECONDS).schedule();
     }
 
@@ -134,10 +98,6 @@ public class VelocityAdapter implements SimpleCommand {
         LanguageAPI.LOGGER.info("Sent plugin message " + OUTGOING.getId() + " for " + player.getUniqueId() + " with content " + locale.toLanguageTag() + ": " + sent);
     }
 
-    public static TextComponent color(String input) {
-        return LegacyComponentSerializer.legacy('&').deserialize(input.replace('§', '&'));
-    }
-
     @Override
     public void execute(Invocation invocation) {
         CommandSource sender = invocation.source();
@@ -146,12 +106,15 @@ public class VelocityAdapter implements SimpleCommand {
         if (!(sender instanceof Player)) {
             return;
         }
+
         Player player = (Player) sender;
+        String uuid = player.getUniqueId().toString();
         if (args.length >= 1) {
 
             if (player.hasPermission("languageapi.reload") && args[0].equalsIgnoreCase("reload")) {
                 this.api.loadMessages();
-                player.sendMessage(color(LanguageAPI.getPrefix() + "Reloaded!"));
+                Message message = new Message("language.command.reloaded").translate(this.api, uuid).prefix(VelocityConfigManager.PREFIX.getValue());
+                player.sendMessage(message.buildComponent());
                 return;
             }
 
@@ -161,10 +124,12 @@ public class VelocityAdapter implements SimpleCommand {
                 entity.setLanguage(locale);
                 updateSubServers(player, locale);
                 entity.saveStats();
-                player.sendMessage(color(LanguageAPI.getPrefix() + getMessage(api, player, "language.command.set").replace("%language%", api.getLanguageString(getUUID(player)))));
+                Message message = new Message("language.command.set").translate(this.api, uuid).replace("%language%", api.getLanguageString(uuid)).prefix(VelocityConfigManager.PREFIX.getValue());
+                player.sendMessage(message.buildComponent());
                 return;
             }
         }
-        player.sendMessage(color(LanguageAPI.getPrefix() + getMessage(api, player, "language.command.invalid-language")));
+        Message message = new Message("language.command.invalid-language").translate(this.api, uuid).prefix(VelocityConfigManager.PREFIX.getValue());
+        player.sendMessage(message.buildComponent());
     }
 }

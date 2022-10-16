@@ -4,6 +4,8 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import net.kettlemc.language.LanguageAPI;
 import net.kettlemc.language.entity.LanguageEntity;
+import net.kettlemc.language.file.VelocityConfigManager;
+import net.kettlemc.language.file.entry.Message;
 import net.kettlemc.language.mysql.SQLHandler;
 import net.kettlemc.language.platform.Platform;
 import net.kettlemc.language.spigot.skript.SkriptLangAddon;
@@ -28,55 +30,6 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
 
     private SkriptLangAddon skriptLangAddon;
     private LanguageAPI api;
-
-    /**
-     * Sends a message to a player/the console
-     * @param api The LanguageAPI you want to send the message from
-     * @param receiver The CommandSender you want to send the message to
-     * @param path The message path you want to send to the commandsender
-     **/
-    public static void sendMessage(LanguageAPI api, CommandSender receiver, String path) {
-        receiver.sendMessage(getColoredMessage(api, receiver, path));
-    }
-
-    /**
-     * Sends a message to all players and the console
-     * @param api The LanguageAPI you want to send the message from
-     * @param path The message path you want to send to the commandsender
-     **/
-    public static void broadcast(LanguageAPI api, String path) {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            sendMessage(api, player, path);
-        }
-        sendMessage(api, Bukkit.getConsoleSender(), path);
-    }
-
-    /**
-     * @param api The LanguageAPI you want to send the message from
-     * @param sender The CommandSender you want to send the message to
-     * @param path The message path you want to send to the commandsender
-     * @return Colored and translated message
-     **/
-    public static String getColoredMessage(LanguageAPI api, CommandSender sender, String path) {
-        String message;
-        if (sender instanceof Player) {
-            message = api.getMessage(path, ((Player) sender).getUniqueId().toString());
-        } else {
-            message = api.getMessage(path, LanguageAPI.getDefaultLang());
-        }
-        return ChatColor.translateAlternateColorCodes('&', message);
-    }
-
-    /**
-     * @param sender CommandSender you want to get the UUID from
-     * @return UUID of the provided entity or null if not a player
-     **/
-    public static String getUUID(CommandSender sender) {
-        String uuid = null;
-        if (sender instanceof Player)
-            uuid = ((Player) sender).getUniqueId().toString();
-        return uuid;
-    }
 
     private void loadSkript() {
         this.getLogger().info("Loading as a bukkit plugin.");
@@ -107,7 +60,6 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
 
     public void onDisable() {
         this.getLogger().info("Disabled bukkit plugin.");
-        //api.save();
     }
 
     @Override
@@ -116,12 +68,14 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
             return false;
 
         Player player = (Player) sender;
+        String uuid = player.getUniqueId().toString();
 
         if (args.length >= 1) {
 
             if (player.hasPermission("languageapi.reload") && args[0].equalsIgnoreCase("reload")) {
                 this.api.loadMessages();
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', LanguageAPI.getPrefix()) + "Reloaded!");
+                Message message = new Message("language.command.reloaded").translate(this.api, uuid).prefix(VelocityConfigManager.PREFIX.getValue());
+                player.sendMessage(message.buildChatColor());
                 return true;
             }
 
@@ -130,11 +84,12 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
                 LanguageEntity entity = LanguageEntity.getEntity(player.getUniqueId().toString());
                 entity.setLanguage(locale);
                 entity.saveStats();
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', LanguageAPI.getPrefix()) + getColoredMessage(api, player, "language.command.set").replace("%language%", api.getLanguageString(getUUID(player))));
+                Message message = new Message("language.command.set").translate(this.api, uuid).replace("%language%", api.getLanguageString(uuid)).prefix(VelocityConfigManager.PREFIX.getValue());
+                player.sendMessage(message.buildChatColor());
                 return true;
             }
         }
-        player.sendMessage(ChatColor.translateAlternateColorCodes('&', LanguageAPI.getPrefix()) + getColoredMessage(api, player, "language.command.invalid-language"));
+        Message message = new Message("language.command.invalid-language").translate(this.api, uuid).prefix(VelocityConfigManager.PREFIX.getValue());
         return false;
     }
 
@@ -146,12 +101,12 @@ public class SpigotAdapter extends JavaPlugin implements CommandExecutor, Listen
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
+        String uuid = event.getPlayer().getUniqueId().toString();
         if (!SpigotUtils.isBungeeEnabled()) {
-            Bukkit.getScheduler().runTaskLaterAsynchronously(this, new Runnable() {
-                @Override
-                public void run() {
-                    event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', LanguageAPI.getPrefix()) + getColoredMessage(api, event.getPlayer(), "language.join.selected").replace("%language%", api.getLanguageString(event.getPlayer().getUniqueId().toString())));
-                }
+            Bukkit.getScheduler().runTaskLaterAsynchronously(this, () -> {
+                Message message = new Message("language.join.selected").translate(api, Locale.ENGLISH).prefix(VelocityConfigManager.PREFIX.getValue());
+                message.replace("%language%", api.getLanguageString(uuid));
+                event.getPlayer().sendMessage(message.buildChatColor());
             }, 20L);
         }
     }
