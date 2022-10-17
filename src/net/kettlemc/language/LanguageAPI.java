@@ -18,7 +18,7 @@ public class LanguageAPI {
     public static final Path CONFIG_PATH = Paths.get("plugins/LanguageAPI/");
     public static final Path LANGUAGE_PATH = CONFIG_PATH.resolve("languages/");
 
-    public static final Configuration CONFIGURATION = new Configuration(CONFIG_PATH);
+    public static final Configuration CONFIGURATION = new Configuration(CONFIG_PATH.resolve("config.json"));
 
     public static final Logger LOGGER = LoggerFactory.getLogger(LanguageAPI.class.getSimpleName());
     public static final String MESSAGE_NAMESPACE = "langapi";
@@ -29,7 +29,7 @@ public class LanguageAPI {
 
     // Can be set in the config file
     private static String prefix;
-    private static Locale defaultLang;
+    private static Locale defaultLang = Locale.GERMAN;
 
     private String id;
     private FileManager manager;

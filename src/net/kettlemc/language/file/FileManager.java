@@ -25,7 +25,7 @@ public class FileManager {
         File directory = LanguageAPI.LANGUAGE_PATH.toFile();
         createFolder(directory);
         for (File langId : directory.listFiles()) {
-            LanguageAPI.LOGGER.debug("Checking " + langId.getAbsolutePath() + " for any language files...");
+            LanguageAPI.LOGGER.info("Checking " + langId.getAbsolutePath() + " for any language files...");
             for (File subFile : langId.listFiles()) {
                 LanguageAPI.LOGGER.info("Detected file " + subFile.getName() + ".");
                 loadLanguage(Locale.forLanguageTag(subFile.getName().replace(".json", "")));
@@ -38,12 +38,12 @@ public class FileManager {
             HashMap<String, String> messages = new HashMap<>();
             File file = getFile(locale);
             createFileIfNotExists(file);
-            LanguageAPI.LOGGER.debug("Loading file " + file.getAbsolutePath() + ".");
+            LanguageAPI.LOGGER.info("Loading file " + file.getAbsolutePath() + ".");
             String content = new String(Files.readAllBytes(Paths.get(file.toURI())), "UTF-8");
             JSONObject json = content.isEmpty() ? new JSONObject() : (JSONObject) new JSONParser().parse(content);
             for (Object key : json.keySet()) {
                 if (key instanceof String)
-                    LanguageAPI.LOGGER.debug("Loaded path '" + key + "' as '" + json.get(key) + "'.");
+                    LanguageAPI.LOGGER.info("Loaded path '" + key + "' as '" + json.get(key) + "'.");
                     messages.put((String) key, (String) json.get(key));
             }
             return messages;
@@ -105,7 +105,7 @@ public class FileManager {
     }
 
     private File getFile(Locale language) {
-        return new File(LanguageAPI.LANGUAGE_PATH + this.id + "/" + language.toLanguageTag() + ".json");
+        return LanguageAPI.LANGUAGE_PATH.resolve(this.id).resolve(language.toLanguageTag() + ".json").toFile();
     }
 
     public String getMessage(String path, Locale language) {
